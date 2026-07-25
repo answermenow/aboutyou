@@ -65,7 +65,7 @@
             transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        #date-options-section, #calendar-section, #contact-section { 
+        #date-options-section, #calendar-section, #social-section { 
             display: none; 
             opacity: 0;
             transform: scale(0.9);
@@ -124,6 +124,7 @@
 </head>
 <body>
 
+    <!-- 1. Krok: Otázka -->
     <div id="question-section" class="card">
         <h1>Ahoj, chceš ísť so mnou na rande? ❤️</h1>
         <div class="buttons-container">
@@ -132,6 +133,7 @@
         </div>
     </div>
 
+    <!-- 2. Krok: Výber aktivity -->
     <div id="date-options-section" class="card">
         <h2>Super! Čo podnikneme? ✨</h2>
         <div class="options-grid">
@@ -143,6 +145,7 @@
         <button id="btn-next" class="btn action-btn" onclick="showCalendar()" disabled>Pokračovať ➔</button>
     </div>
 
+    <!-- 3. Krok: Kalendár a čas -->
     <div id="calendar-section" class="card">
         <h2>Kedy ti to vyhovuje? 🌹</h2>
         
@@ -178,17 +181,18 @@
             </div>
         </div>
 
-        <input type="hidden" id="hidden-date-type" value="">
-        <button id="btn-to-contact" class="btn action-btn" onclick="showContact()">Pokračovať ➔</button>
+        <button id="btn-to-social" class="btn action-btn" onclick="showSocial()">Pokračovať ➔</button>
     </div>
 
-    <!-- Nová sekcia pre kontakt -->
-    <div id="contact-section" class="card">
+    <!-- 4. Krok: Instagram / FB kontakt -->
+    <div id="social-section" class="card">
         <h2>Už len posledný detail... 💬</h2>
         <div class="form-group">
-            <label for="social-contact">Napíš mi tvoj Instagram alebo FB:</label>
-            <input type="text" id="social-contact" placeholder="@tvoj_instagram alebo meno na FB...">
+            <label for="social-input">Tvoj Instagram alebo Facebook (nech viem, komu písať):</label>
+            <input type="text" id="social-input" placeholder="@tvoj_instagram alebo Meno Priezvisko">
         </div>
+
+        <input type="hidden" id="hidden-date-type" value="">
         <button id="btn-submit" class="btn action-btn" onclick="odoslatRande()">Potvrdiť rande! 🎉</button>
     </div>
 
@@ -197,7 +201,7 @@
         var questionSection = document.getElementById('question-section');
         var optionsSection = document.getElementById('date-options-section');
         var calendarSection = document.getElementById('calendar-section');
-        var contactSection = document.getElementById('contact-section');
+        var socialSection = document.getElementById('social-section');
         var nextBtn = document.getElementById('btn-next');
         var hiddenInput = document.getElementById('hidden-date-type');
         var submitBtn = document.getElementById('btn-submit');
@@ -251,7 +255,7 @@
             }, 10);
         }
 
-        function showContact() {
+        function showSocial() {
             var datum = document.getElementById('datepicker').value;
             var hodina = document.getElementById('select-hour').value;
             var minuta = document.getElementById('select-minute').value;
@@ -262,10 +266,10 @@
             }
 
             calendarSection.style.display = 'none';
-            contactSection.style.display = 'block';
+            socialSection.style.display = 'block';
             setTimeout(function() {
-                contactSection.style.opacity = '1';
-                contactSection.style.transform = 'scale(1)';
+                socialSection.style.opacity = '1';
+                socialSection.style.transform = 'scale(1)';
             }, 10);
         }
 
@@ -274,10 +278,10 @@
             var datum = document.getElementById('datepicker').value;
             var hodina = document.getElementById('select-hour').value;
             var minuta = document.getElementById('select-minute').value;
-            var kontakt = document.getElementById('social-contact').value;
+            var kontakt = document.getElementById('social-input').value;
 
             if (!kontakt.trim()) {
-                alert('Prosím napíš svoj Instagram alebo Facebook, nech viem, komu odpovedám.');
+                alert('Prosím napíš svoj Instagram alebo Facebook.');
                 return;
             }
 
@@ -285,13 +289,14 @@
             submitBtn.innerText = 'Odosielam... ⏳';
 
             var dataNaOdoslanie = {
-                WebovaAdresa: window.location.href,
                 Aktivita: rande,
                 Datum: datum,
                 Cas: hodina + ':' + minuta,
-                Kontakt: kontakt
+                Kontakt: kontakt,
+                Web: window.location.href
             };
 
+            // Zmeň nižšie "xpqeoqqw" za tvoj presný kód z Formspree
             var urlFormspree = "https://formspree.io/f/xpqeoqqw";
 
             fetch(urlFormspree, {
@@ -304,18 +309,16 @@
             })
             .then(function(response) {
                 if (response.ok) {
-                    alert('Úspech! ❤️\n\nĎakujem za odpoveď.');
+                    alert('Úspech! ❤️\n\nĎakujem za odpoveď!');
                     
-                    // 1. Skrytie kontaktnej sekcie
-                    contactSection.style.display = 'none';
-                    contactSection.style.opacity = '0';
-                    contactSection.style.transform = 'scale(0.9)';
+                    // Reset a návrat na začiatok
+                    socialSection.style.display = 'none';
+                    socialSection.style.opacity = '0';
 
-                    // 2. Reset formulárových polí
                     document.getElementById('datepicker').value = '';
                     document.getElementById('select-hour').selectedIndex = 0;
                     document.getElementById('select-minute').selectedIndex = 0;
-                    document.getElementById('social-contact').value = '';
+                    document.getElementById('social-input').value = '';
                     hiddenInput.value = '';
                     
                     var cards = document.querySelectorAll('.option-card');
@@ -323,17 +326,14 @@
                         cards[i].classList.remove('selected'); 
                     }
                     nextBtn.disabled = true;
-                    
                     submitBtn.disabled = false;
                     submitBtn.innerText = 'Potvrdiť rande! 🎉';
 
-                    // 3. Návrat tlačidla "Nie" na pôvodnú pozíciu
                     escapeBtn.style.position = 'absolute';
                     escapeBtn.style.left = 'calc(50% + 15px)';
                     escapeBtn.style.top = '15px';
                     escapeBtn.style.transform = 'none';
 
-                    // 4. Zobrazenie prvej stránky
                     questionSection.style.display = 'block';
                     setTimeout(function() {
                         questionSection.style.opacity = '1';
@@ -341,12 +341,14 @@
                     }, 10);
 
                 } else {
-                    throw new Error('Chyba servera');
+                    alert('Chyba Formspree servera. Skontroluj, či je formulár vo Formspree aktívny.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Potvrdiť rande! 🎉';
                 }
             })
             .catch(function(error) {
                 console.error('Chyba:', error);
-                alert('Ups, niečo sa pokazilo pri odosielaní. Skús to znova.');
+                alert('Nepodarilo sa odoslať odpoveď. Skontroluj pripojenie k internetu.');
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'Potvrdiť rande! 🎉';
             });
