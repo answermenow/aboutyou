@@ -65,7 +65,7 @@
             transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        #date-options-section, #calendar-section { 
+        #date-options-section, #calendar-section, #contact-section { 
             display: none; 
             opacity: 0;
             transform: scale(0.9);
@@ -179,6 +179,16 @@
         </div>
 
         <input type="hidden" id="hidden-date-type" value="">
+        <button id="btn-to-contact" class="btn action-btn" onclick="showContact()">Pokračovať ➔</button>
+    </div>
+
+    <!-- Nová sekcia pre kontakt -->
+    <div id="contact-section" class="card">
+        <h2>Už len posledný detail... 💬</h2>
+        <div class="form-group">
+            <label for="social-contact">Napíš mi tvoj Instagram alebo FB:</label>
+            <input type="text" id="social-contact" placeholder="@tvoj_instagram alebo meno na FB...">
+        </div>
         <button id="btn-submit" class="btn action-btn" onclick="odoslatRande()">Potvrdiť rande! 🎉</button>
     </div>
 
@@ -187,6 +197,7 @@
         var questionSection = document.getElementById('question-section');
         var optionsSection = document.getElementById('date-options-section');
         var calendarSection = document.getElementById('calendar-section');
+        var contactSection = document.getElementById('contact-section');
         var nextBtn = document.getElementById('btn-next');
         var hiddenInput = document.getElementById('hidden-date-type');
         var submitBtn = document.getElementById('btn-submit');
@@ -240,14 +251,33 @@
             }, 10);
         }
 
-        function odoslatRande() {
-            var rande = hiddenInput.value;
+        function showContact() {
             var datum = document.getElementById('datepicker').value;
             var hodina = document.getElementById('select-hour').value;
             var minuta = document.getElementById('select-minute').value;
 
             if (!datum || !hodina || !minuta) {
                 alert('Prosím vyber dátum a čas.');
+                return;
+            }
+
+            calendarSection.style.display = 'none';
+            contactSection.style.display = 'block';
+            setTimeout(function() {
+                contactSection.style.opacity = '1';
+                contactSection.style.transform = 'scale(1)';
+            }, 10);
+        }
+
+        function odoslatRande() {
+            var rande = hiddenInput.value;
+            var datum = document.getElementById('datepicker').value;
+            var hodina = document.getElementById('select-hour').value;
+            var minuta = document.getElementById('select-minute').value;
+            var kontakt = document.getElementById('social-contact').value;
+
+            if (!kontakt.trim()) {
+                alert('Prosím napíš svoj Instagram alebo Facebook, nech viem, komu odpovedám.');
                 return;
             }
 
@@ -258,7 +288,8 @@
                 WebovaAdresa: window.location.href,
                 Aktivita: rande,
                 Datum: datum,
-                Cas: hodina + ':' + minuta
+                Cas: hodina + ':' + minuta,
+                Kontakt: kontakt
             };
 
             var urlFormspree = "https://formspree.io/f/xpqeoqqw";
@@ -275,15 +306,16 @@
                 if (response.ok) {
                     alert('Úspech! ❤️\n\nĎakujem za odpoveď.');
                     
-                    // 1. Skrytie kalendára
-                    calendarSection.style.display = 'none';
-                    calendarSection.style.opacity = '0';
-                    calendarSection.style.transform = 'scale(0.9)';
+                    // 1. Skrytie kontaktnej sekcie
+                    contactSection.style.display = 'none';
+                    contactSection.style.opacity = '0';
+                    contactSection.style.transform = 'scale(0.9)';
 
                     // 2. Reset formulárových polí
                     document.getElementById('datepicker').value = '';
                     document.getElementById('select-hour').selectedIndex = 0;
                     document.getElementById('select-minute').selectedIndex = 0;
+                    document.getElementById('social-contact').value = '';
                     hiddenInput.value = '';
                     
                     var cards = document.querySelectorAll('.option-card');
